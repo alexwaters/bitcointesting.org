@@ -11,6 +11,7 @@ monDB = connection['bitcointesting']
 @app.route("/", methods=['GET', 'POST'])
 def home():
     pulls = monDB['pulls'].find({'status':'active'})
+    #we have to add the nightly builds of the master branch, and have that as the first selectable option
     return render_template('home.html', pulls)
 
 @app.route("download", methods=['POST'])
