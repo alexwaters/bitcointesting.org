@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block body %}
+<form method="post" action="download">
+        <select name="Feature Builds">
+                {% for pull in pulls %}
+                <option value="{{ pull['pullnum'] }}">{{ pull['name'] }}</option>
+                <input type="hidden" name="binary" value="{{ pull['binary'] }}">
+                {% endfor %}
+        </select>
+        <input type="submit" value="Download"/>
+</form>
+{% endblock %}
