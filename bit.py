@@ -2,11 +2,14 @@ from flask import Flask, render_template, request
 from pymongo import Connection
 import pulls
 import builds
+import githubAPI
+import configuration
 
 app = Flask(__name__)
 
 connection = Connection()
 monDB = connection['bitcointesting']
+github = githubAPI.GithubAPI(configuration.github_user, configuration.github_password)
 
 @app.route("/", methods=['GET', 'POST'])
 def home():
