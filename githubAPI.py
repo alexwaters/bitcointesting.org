@@ -1,45 +1,59 @@
-from libsaas.services import github
-import configuration
 import requests
 import json
 import pprint    
     
 pp = pprint.PrettyPrinter(indent=4)
 
-def get_pull_nums():
+#get the first 100 of the open pull requests for a repo, and return the issue urls
+def get_pulls(owner,repo):
     #/repos/:owner/:repo/pulls
-    request = requests.get('https://api.github.com/repos/bitcoin/bitcoin/pulls?per_page=100')
     count = 0
-    pulls_nums = []
+    pulls = []
     
+    request = requests.get('https://api.github.com/repos/%s/%s/pulls?per_page=100' % owner, repo)
     content = json.loads(request.content)
     
     for pull in content:
-        pulls.append(pull['issue_url'].split('/'))
+        pulls.append(pull)
         count+=1
     
+    print ('\n%s open pull requests.' % str(count))
+    return pulls
+
+
+#get the first 100 of the open pull requests for a repo, and return the issue urls
+def get_pull_nums(owner,repo):
+    #/repos/:owner/:repo/pulls
+    count = 0
+    pull_nums = []
     
-cc=0
-bc =0
+    request = requests.get('https://api.github.com/repos/%s/%s/pulls?per_page=100' % owner, repo)
+    content = json.loads(request.content)
+    
+    for pull in content:
+        pull_nums.append(pull['issue_url'].split('/')[-1])
+        count+=1
+    
+    print ('\n%s open pull requests with issue URLs.' % str(count))
+    return pull_nums
 
 
+#get all the comments from a specific user    
+def get_comments(owner,repo,user):
+    #/repos/:owner/:repo/issues/:number/comments
+    pull_nums = get_pull_nums(owner,repo)
+    count = 0
+    comments = []
+    
+    for num in pull_nums:
+        request = requests.get('https://api.github.com/repos/%s/%s/issues/%s/comments' % owner, repo, num)
+        content = json.loads(request.content)
 
-
-#/repos/:owner/:repo/issues/:number/comments
-r2 = requests.get('https://api.github.com/repos/bitcoin/bitcoin/issues/2415/comments') 
-j2 = json.loads(r2.content)
-
-for item2 in j2:
-    cc+=1
-    user = item2['user']['login']
-    if user.count('BitcoinPullTester') > 0:
-        bc+=1
-        print item2['body']
-
-print 'pulls: ' + str(pc)    
-print 'comments: ' + str(cc)
-print 'binaries: ' + str(bc)
-print 'done'
-
-
-
+        for comment in content:
+            login =  comment['user']['login']
+            if login is user:
+                comments.append(comment['body'])
+                count +=1
+ 
+    print ('\n%s comments by %s' % str(count), user)
+    return comments

@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 connection = Connection()
 monDB = connection['bitcointesting']
-github = githubAPI.GithubAPI(configuration.github_user, configuration.github_password)
+comments = githubAPI.get_comments('bitcoin','bitcoin','BitcoinBuildTester')
 
 @app.route("/", methods=['GET', 'POST'])
 def home():
@@ -25,7 +25,7 @@ def download():
 def updateDB():
     #Grab the PB
     try:
-        p = pulls.grabPulls()
+        p = githubAPI.get_pulls('bitcoin','bitcoin')
         b = builds.grabBuilds()
         print "Pulls updated: " + p + " Builds updated: " + b
     except Exception as e:
