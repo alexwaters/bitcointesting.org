@@ -1,15 +1,15 @@
 from flask import Flask, render_template, request
 from pymongo import Connection
-import pulls
-import builds
-import githubAPI
-import configuration
+import pulls, builds, githubAPI, configuration
 
 app = Flask(__name__)
 
 connection = Connection()
 monDB = connection['bitcointesting']
-comments = githubAPI.get_comments('bitcoin','bitcoin','BitcoinBuildTester')
+
+owner = configuration.github_owner
+repo = configuration.github_repo
+bot_user = repo = configuration.github_repo
 
 @app.route("/", methods=['GET', 'POST'])
 def home():
@@ -22,6 +22,26 @@ def download():
     binary = request.form['binary']
     return render_template('download.html', binary)
 
+
+#Grab all the comments on open pull requests, and filter out those made by the bot
+def get_bot_comments():
+    pull_nums=githubAPI.get_pull_nums(owner,repo)
+    bot_comments = []
+    
+    for pull in pull_nums:
+        bot_comments.append(githubAPI.get_user_comments(owner,repo,pull,bot_user))
+    
+    return bot_comments
+    
+
+#Grab all the binaries from the bots comments and enforce 1:pull 
+def get_binaries():
+    comments = get_bot_comments()
+    binaries = []
+    return binaries    
+    
+
+#save all the shit in the db
 def updateDB():
     #Grab the PB
     try:
@@ -44,7 +64,6 @@ def updateDB():
 if __name__ == "__main__":
     app.run()
     
-    #auth to github
     #get all the open pull requests from github bitcoin/bitcoin that can be automatically merged.
     #store them in the db. Name, author, date
     #grab the build's file urls from matt's jenkins
