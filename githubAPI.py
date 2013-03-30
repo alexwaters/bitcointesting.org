@@ -1,6 +1,7 @@
-import requests
-import json
-import pprint    
+import requests,json,pprint
+import configuration
+
+v = configuration.verbose
     
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -17,8 +18,18 @@ def get_pulls(owner,repo):
         pulls.append(pull)
         count+=1
     
-    print ('\n%s open pull requests.' % str(count))
+    if v: print ('\n%s open pull requests.' % str(count))
     return pulls
+
+
+def get_pull_comments(owner,repo,pull):
+    count = 0
+    request = requests.get('https://api.github.com/repos/%s/%s/issues/%s/comments' % owner, repo, pull)
+    comments = json.loads(request.content)
+    
+    for comment in comments: count+=1
+    if v: print ('\n%s comments in pull number %s.' % str(count),pull)
+    return comments
 
 
 #get the first 100 of the open pull requests for a repo, and return the issue urls
@@ -31,12 +42,9 @@ def get_pull_nums(owner,repo):
     for pull in pulls:
         pull_nums.append(pull['issue_url'].split('/')[-1])
         count+=1
+    
+    if v: print ('\n%s pull numbers extracted.' % str(count))
     return pull_nums
-
-
-def get_pull_comments(owner,repo,pull):
-    request = requests.get('https://api.github.com/repos/%s/%s/issues/%s/comments' % owner, repo, pull)
-    return json.loads(request.content)
 
         
 def get_user_comments(owner,repo,pull,user):
@@ -49,20 +57,7 @@ def get_user_comments(owner,repo,pull,user):
         if login is user:
             user_comments.append(comment['body'])
             count +=1
+            
+    if v: print ('\n%s comments by %s in pull number %s' % str(count),user,pull)            
     return user_comments
-
-
-#get all the comments 
-def get_all_comments(owner,repo):
-    #/repos/:owner/:repo/issues/:number/comments
-    pull_nums = get_pull_nums(owner,repo)
-    all_comments = []
-    count = 0
-    
-    for num in pull_nums:
-        request = requests.get('https://api.github.com/repos/%s/%s/issues/%s/comments' % owner, repo, num)
-        comments = json.loads(request.content)
-        all_comments.append(comments)
-        count +=1
-    return all_comments
 

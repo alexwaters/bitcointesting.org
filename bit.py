@@ -9,7 +9,7 @@ monDB = connection['bitcointesting']
 
 owner = configuration.github_owner
 repo = configuration.github_repo
-bot_user = repo = configuration.github_repo
+bot_user = configuration.bot_user
 
 @app.route("/", methods=['GET', 'POST'])
 def home():
